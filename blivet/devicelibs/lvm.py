@@ -232,8 +232,11 @@ def lvm(args, capture=False, ignore_errors=False):
     if capture:
         return out
 
-def pvcreate(device):
-    args = ["pvcreate", device]
+def pvcreate(device, data_alignment=None):
+    args = ["pvcreate"]
+    if data_alignment is not None:
+        args.extend(["--dataalignment", "%dk" % data_alignment.convertTo("KiB")])
+    args.append(device)
 
     try:
         lvm(args)
