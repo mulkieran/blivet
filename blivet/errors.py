@@ -174,3 +174,7 @@ class UnknownSourceDeviceError(StorageError):
 # factories
 class DeviceFactoryError(StorageError):
     pass
+
+# tasks and availability
+class ResourceUnavailableError(StorageError):
+    pass
