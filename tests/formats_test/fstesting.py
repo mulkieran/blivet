@@ -54,7 +54,7 @@ class FSAsRoot(loopbackedtestcase.LoopBackedTestCase):
         self.assertEqual(an_fs.size, expected_size)
 
         # Only the resizable filesystems can figure out their current min size
-        if an_fs._resizefs:
+        if an_fs._resize:
             expected_min_size = min_size
         else:
             expected_min_size = an_fs._minSize
@@ -191,7 +191,7 @@ class FSAsRoot(loopbackedtestcase.LoopBackedTestCase):
             self.assertEqual(an_fs.targetSize, TARGET_SIZE)
             self.assertNotEqual(an_fs._size, TARGET_SIZE)
             self.assertIsNone(an_fs.doResize())
-            ACTUAL_SIZE = TARGET_SIZE.roundToNearest(an_fs._resizefsUnit, rounding=ROUND_DOWN)
+            ACTUAL_SIZE = TARGET_SIZE.roundToNearest(an_fs._resize.unit, rounding=ROUND_DOWN)
             self.assertEqual(an_fs.size, ACTUAL_SIZE)
             self.assertEqual(an_fs._size, ACTUAL_SIZE)
             self._test_sizes(an_fs)
@@ -269,7 +269,7 @@ class FSAsRoot(loopbackedtestcase.LoopBackedTestCase):
         if isinstance(an_fs, fs.NTFS):
             return
         self.assertIsNone(an_fs.doResize())
-        ACTUAL_SIZE = TARGET_SIZE.roundToNearest(an_fs._resizefsUnit, rounding=ROUND_DOWN)
+        ACTUAL_SIZE = TARGET_SIZE.roundToNearest(an_fs._resize.unit, rounding=ROUND_DOWN)
         self.assertEqual(an_fs._size, ACTUAL_SIZE)
         self._test_sizes(an_fs)
 
@@ -326,7 +326,7 @@ class FSAsRoot(loopbackedtestcase.LoopBackedTestCase):
 
         # CHECKME: size and target size will be adjusted attempted values
         # while currentSize will be actual value
-        TARGET_SIZE = BIG_SIZE.roundToNearest(an_fs._resizefsUnit, rounding=ROUND_DOWN)
+        TARGET_SIZE = BIG_SIZE.roundToNearest(an_fs._resize.unit, rounding=ROUND_DOWN)
         self.assertEqual(an_fs.targetSize, TARGET_SIZE)
         self.assertEqual(an_fs.size, an_fs.targetSize)
         self.assertEqual(an_fs.currentSize, old_size)
