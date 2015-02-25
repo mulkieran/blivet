@@ -43,7 +43,7 @@ from .devices import devicePathToName
 from .deviceaction import ActionCreateDevice, ActionDestroyDevice, action_type_from_string, action_object_from_string
 from . import formats
 from .formats import getFormat
-from .formats.fs import nodev_filesystems
+from .fslib import nodev_filesystems
 from .devicelibs import lvm
 from .devicelibs import edd
 from . import udev
