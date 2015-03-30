@@ -1135,26 +1135,43 @@ class Blivet(object):
 
             If the device has formatting that is recognized as being resizable
             an action will be scheduled to resize it as well.
+
+            In the case of a LUKS device, the slave device is actually resized,
+            but the format on the LUKS device must be resized as well.
         """
         if device.protected:
             raise ValueError("cannot modify protected device")
 
-        classes = []
-        if device.resizable:
-            classes.append(ActionResizeDevice)
+        raw_device = device.raw_device
+        raw_device_size = new_size + device.rawDeviceSizeDiff
 
+        actions = []
+        # Resize raw device
+        if raw_device.resizable:
+            actions.append(ActionResizeDevice(raw_device, raw_device_size))
+
+        # If raw device and device are different, then must consider
+        # format on parent device.
+        if raw_device != device:
+            if device.resizable:
+                actions.append(ActionResizeDevice(device, new_size))
+
+            if raw_device.format.resizable:
+                actions.append(ActionResizeFormat(raw_device, raw_device_size))
+
+        # Resize the device's format
         if device.format.resizable:
-            classes.append(ActionResizeFormat)
+            actions.append(ActionResizeFormat(device, new_size))
 
-        if not classes:
+        if not actions:
             raise ValueError("device cannot be resized")
 
-        # if this is a shrink, schedule the format resize first
-        if new_size < device.size:
-            classes.reverse()
+        # if this is a shrink, add the actions in the opposite order
+        if raw_device_size < raw_device.size:
+            actions.reverse()
 
-        for action_class in classes:
-            self.devicetree.registerAction(action_class(device, new_size))
+        for action in actions:
+            self.devicetree.registerAction(action)
 
     def formatByDefault(self, device):
         """Return whether the device should be reformatted by default."""
