@@ -480,7 +480,7 @@ class ActionResizeDevice(DeviceAction):
         """
         retval = super(ActionResizeDevice, self).requires(action)
         if action.isResize:
-            if self.device.id == action.device.id and \
+            if self.device.id == action.device.raw_device.id and \
                self.dir == action.dir and \
                action.isFormat and self.isShrink:
                 retval = True
@@ -792,6 +792,11 @@ class ActionResizeFormat(DeviceAction):
 
                 - the other action is a device resize on the same device and
                   both are grow operations
+                - the other action is a device format action on the child
+                  LUKS device, and both are grow operations
+                - this action is a format action on a LUKS format and the
+                  other action is a format action on the raw device and both
+                  are shrink actions
                 - the other action shrinks a device (or format it contains)
                   that depends on this action's device
                 - the other action grows a device (or format) that this
@@ -800,9 +805,18 @@ class ActionResizeFormat(DeviceAction):
         """
         retval = super(ActionResizeFormat, self).requires(action)
         if action.isResize:
-            if self.device.id == action.device.id and \
+            raw_device = action.device.raw_device
+            if self.device.id == raw_device.id and \
                self.dir == action.dir and \
                action.isDevice and self.isGrow:
+                retval = True
+            elif action.device != raw_device and \
+               self.dir == action.dir and \
+               action.isFormat and self.isGrow:
+                retval = True
+            elif self.device != self.device.raw_device and \
+               self.dir == action.dir and \
+               action.isFormat and self.isShrink:
                 retval = True
             elif action.isShrink and action.device.dependsOn(self.device):
                 retval = True
