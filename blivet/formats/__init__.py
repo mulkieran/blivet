@@ -183,6 +183,8 @@ class DeviceFormat(ObjectID):
         self._options = None
         self._device = None
 
+        self._targetSize = Size(0)
+
         self.device = kwargs.get("device")
         self.uuid = kwargs.get("uuid")
         self.exists = kwargs.get("exists", False)
@@ -288,6 +290,50 @@ class DeviceFormat(ObjectID):
        lambda s: s._getOptions(),
        lambda s,v: s._setOptions(v),
        doc="fstab entry option string"
+    )
+
+    def _getTargetSize(self):
+        """ Get the target size.
+
+            :returns: the target size
+            :rtype: :class:`~.size.Size`
+        """
+        return self._targetSize
+
+    def _setTargetSize(self, newsize):
+        """ Set the target size.
+
+            :param :class:`~.size.Size` newsize: a size value
+
+            This is the size which the format is set to when the
+            format is resized.
+        """
+        if not isinstance(newsize, Size):
+            raise ValueError("new size must be of type Size")
+
+        if not self.exists:
+            raise FSError("filesystem has not been created")
+
+        if not self.resizable:
+            raise FSError("filesystem is not resizable")
+
+        if newsize is None:
+            # unset any outstanding resize request
+            self._targetSize = self._size
+            return
+
+        if self.minSize and newsize < self.minSize:
+            raise ValueError("requested size %s must be at least minimum size %s" % (newsize, self.minSize))
+
+        if self.maxSize and newsize >= self.maxSize:
+            raise ValueError("requested size %s must be less than maximum size %s" % (newsize, self.maxSize))
+
+        self._targetSize = newsize
+
+    targetSize = property(
+      lambda s: s._getTargetSize(),
+      lambda s, v: s._setTargetSize(v),
+      doc="target size for a resize operation"
     )
 
     def _deviceCheck(self, devspec):

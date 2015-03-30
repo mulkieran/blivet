@@ -194,34 +194,6 @@ class FS(DeviceFormat):
     label = property(lambda s: s._getLabel(), lambda s,l: s._setLabel(l),
        doc="this filesystem's label")
 
-    def _setTargetSize(self, newsize):
-        """ Set a target size for this filesystem. """
-        if not isinstance(newsize, Size):
-            raise ValueError("new size must be of type Size")
-
-        if not self.exists:
-            raise FSError("filesystem has not been created")
-
-        if not self.resizable:
-            raise FSError("filesystem is not resizable")
-
-        if newsize is None:
-            # unset any outstanding resize request
-            self._targetSize = self._size
-            return
-
-        if not self.minSize <= newsize < self.maxSize:
-            raise ValueError("requested size %s must fall between minimum size %s and maximum size %s" % (newsize, self.minSize, self.maxSize))
-
-        self._targetSize = newsize
-
-    def _getTargetSize(self):
-        """ Get this filesystem's target size. """
-        return self._targetSize
-
-    targetSize = property(_getTargetSize, _setTargetSize,
-                          doc="Target size for this filesystem")
-
     def _getSize(self):
         """ Get this filesystem's size. """
         return self.targetSize if self.resizable else self._size
