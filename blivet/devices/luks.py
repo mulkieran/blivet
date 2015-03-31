@@ -60,9 +60,13 @@ class LUKSDevice(DMCryptDevice):
         return self.slave
 
     @property
+    def rawDeviceSizeDiff(self):
+        return crypto.LUKS_METADATA_SIZE
+
+    @property
     def size(self):
         if not self.exists:
-            size = self.slave.size - crypto.LUKS_METADATA_SIZE
+            size = self.slave.size - self.rawDeviceSizeDiff
         else:
             size = self.currentSize
         return size

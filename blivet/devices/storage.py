@@ -170,6 +170,20 @@ class StorageDevice(Device):
         """ The device itself, or when encrypted, the backing device. """
         return self
 
+    @property
+    def rawDeviceSizeDiff(self):
+        """ The extra space on the raw device required to hold metadata,
+            hence not available for this device. Generally, this is the
+            LUKS metadata.
+
+            For most devices, the raw device and the device are the same,
+            so the extra space is 0.
+
+            :returns: the size difference
+            :rtype: :class:`~.Size`
+        """
+        return Size(0)
+
     def _setName(self, value):
         """Set the device's name.
 
