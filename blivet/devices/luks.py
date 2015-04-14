@@ -32,6 +32,7 @@ class LUKSDevice(DMCryptDevice):
     """ A mapped LUKS device. """
     _type = "luks/dm-crypt"
     _packages = ["cryptsetup"]
+    _resizable = True
 
     def __init__(self, name, fmt=None, size=None, uuid=None,
                  exists=False, sysfsPath='', parents=None):
@@ -70,6 +71,9 @@ class LUKSDevice(DMCryptDevice):
         else:
             size = self.currentSize
         return size
+
+    def resize(self):
+        pass
 
     def _postCreate(self):
         self.name = self.slave.format.mapName
